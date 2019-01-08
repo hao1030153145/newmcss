@@ -1,0 +1,12 @@
+1.JDK
+2.Android SDK: C:\Users\Administrator\AppData\Local\Android\Sdk
+3.appium server
+4.node.js:C:\Program Files\nodejs\
+5.root手机
+6.打开cmd 输入adb tcpip 5555(端口号自己定义)
+7.adb connect ip_address:port(手机ip+端口号)
+8.D:\ 下新建showdevice.bat文件
+
+appium servier bug:
+1.log不能释放：删除存入log代码，log.js
+2.window系统下，kill any old chromeDriver         卡死，chromeDriver.js下屏蔽掉杀死 chromeDriver代码

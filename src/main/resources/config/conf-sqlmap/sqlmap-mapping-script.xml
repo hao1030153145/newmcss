@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="scriptMapper">
+    <!-- TODO: 在这里定义各种sql语句，用法请参考iBATIS文档 -->
+
+    <!-- 获得联系人列表 -->
+    <select id="getContactList" resultType="com.transing.mcss4dpm.integration.bo.ContactBO">
+        SELECT
+        id,`name`,phone
+        FROM
+        contacts
+    </select>
+</mapper>
+
+

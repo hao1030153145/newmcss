@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="crawlRegulationMapper">
+
+    <!--下面是根据scriptId获取数据数目-->
+    <select id="selectRegulationTotalBydataTypeId" resultType="com.transing.mcss4dpm.integration.bo.CrawlRegulationTestBO" parameterType ="java.lang.Integer">
+               select scriptid,item,description,type,length,isnull,step,datafrom,crawlparam,crawlarray,afterprocessorarray
+        FROM crawl_regulation WHERE  datatypeid = #{dataTypeId}
+    </select>
+
+
+
+
+</mapper>

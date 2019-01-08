@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <description>定义业务层和集成层对象，包括Action、Service、BO、DAO、SAO、JNDI资源</description>
+
+    <context:component-scan
+            base-package="com.transing.mcss4dpm.util,com.transing.mcss4dpm.biz.service.impl.api,com.transing.mcss4dpm.JobEvent,com.transing.mcss4dpm.job.DealClass"/>
+
+    <!--===================================================================== -->
+    <!-- 配置外部变量文件 -->
+    <!--===================================================================== -->
+    <!--<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
+    <!--</bean>-->
+    <bean id="configProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <description>可以引用CLASSPATH中mcss4dpm-local.properties中定义的变量</description>
+            <list>
+                <value>classpath:mcss4dpm-${conf.env}.properties</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+        <property name="properties" ref="configProperties"/>
+    </bean>
+
+
+    <bean id="jeeTaskServer" class="com.transing.mcss4dpm.JobEvent.McssJeeTaskServer" init-method="start">
+        <property name="zookeeperConnectionString" value="${jeetask.zookeeperConnectionString}"/>
+        <property name="zookeeperEmbedPort" value="${jeetask.zookeeperEmbedPort}"/>
+        <property name="zookeeperJobNamespace" value="${jeetask.zookeeperJobNamespace}"/>
+        <property name="jobEventProcessorClass" value="${jeetask.jobEventStorageApiClass}"/>
+        <property name="jobEventProcessorType" value="${jeetask.jobEventProcessorType}"/>
+    </bean>
+
+    <bean id="jeeTaskClient" class="com.jeeframework.jeetask.startup.JeeTaskClient" init-method="start">
+        <property name="zookeeperConnectionString" value="${jeetask.zookeeperConnectionString}"/>
+        <property name="zookeeperEmbedPort" value="${jeetask.zookeeperEmbedPort}"/>
+        <property name="zookeeperJobNamespace" value="${jeetask.zookeeperJobNamespace}"/>
+        <property name="jobEventProcessorClass" value="${jeetask.jobEventStorageApiClass}"/>
+        <property name="jobEventProcessorType" value="${jeetask.jobEventProcessorType}"/>
+    </bean>
+
+    <!--<bean id="baseSaoHDFS" class="com.jeeframework.logicframework.integration.sao.hdfs.BaseSaoHDFS">-->
+        <!--<property name="hdfsAddress" value="${hadoop.hdfsAddress}"/>-->
+        <!--<property name="userName"  value="${hadoop.username}" />-->
+    <!--</bean>-->
+
+    <bean id="kafkaConsumer" class="com.transing.mcss4dpm.job.BaseKafkaConsumerImpl">
+        <property name="kafkaZookeeperConnect" value="${kafka.zookeeper.connect}"/>
+        <property name="kafkaZookeeperNamespace" value="${kafka.zookeeper.namespace}"/>
+        <property name="topic" value="${kafka.topic}"/>
+        <property name="groupId" value="${kafka.groupId}"/>
+        <property name="kafkaNamespace" value="${kafka.namespace}"/>
+    </bean>
+
+    <bean id="kafkaConsumeDevice" class="com.transing.mcss4dpm.job.BaseKafkaConsumerImpl" >
+        <property name="kafkaZookeeperConnect" value="${kafka.zookeeper.connect}"/>
+        <property name="kafkaZookeeperNamespace" value="${kafka.zookeeper.namespace}"/>
+        <property name="topic" value="${kafka.device.topic}"/>
+        <property name="groupId" value="${kafka.device.groupId}"/>
+        <property name="kafkaNamespace" value="${kafka.namespace}"/>
+    </bean>
+
+    <bean id="baseSaoZookeeper" class="com.jeeframework.logicframework.integration.sao.zookeeper.BaseSaoZookeeper">
+        <property name="zookeeperConnectionString" value="${sao.zookeeperConnectionString}"/>
+        <property name="zookeeperNamespace" value="${sao.zookeeperNamespace}"/>
+        <property name="zookeeperUserName" value="${sao.zookeeperUserName}"/>
+        <property name="zookeeperPassword" value="${sao.zookeeperPassword}"/>
+        <property name="isCached" value="${sao.isCached}"/>
+    </bean>
+
+</beans>

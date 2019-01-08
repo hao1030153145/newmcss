@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="projectMapper">
+    <!-- TODO: 在这里定义各种sql语句，用法请参考iBATIS文档 -->
+    <select id="getTaskById" parameterType="java.util.Map"
+            resultType="com.transing.mcss4dpm.integration.bo.Task">
+        SELECT taskid,pId,taskname,datasource,dataType,inputpara,starttime,completetime,completeNu,status,tasknu FROM
+        task_crawl
+        WHERE
+        isdelete = 0
+        <if test="pid != null and pid!=''">
+            AND pid=#{pid}
+        </if>
+    </select>
+
+    <select id="getTaskByTaskId" parameterType="java.util.Map"
+            resultType="com.transing.mcss4dpm.integration.bo.Task">
+        SELECT
+        taskid,pid,detailid,projectid,firstdetailid,flowid,taskname,datasource,datatype,inputpara,starttime,completetime,completeNu,status,tasknu,batchno
+        FROM
+        task_crawl
+        WHERE
+        isdelete = 0
+        <if test="taskId != null and taskId!=''">
+            AND taskid=#{taskId}
+        </if>
+    </select>
+
+    <select id="getTTaskByTaskId" parameterType="java.util.Map"
+            resultType="com.transing.mcss4dpm.integration.bo.TTask">
+        SELECT id FROM
+        t_task
+        WHERE
+        task_id=#{taskId}
+    </select>
+
+    <select id="getSubTask" parameterType="java.util.Map"
+            resultType="com.transing.mcss4dpm.integration.bo.SubTask">
+        SELECT taskid,dealclass,datasource,datatype,inputpara,status FROM sub_task
+        WHERE
+        status=0
+        <if test="pid != null and pid!=''">
+            AND taskid=#{pid}
+        </if>
+    </select>
+
+    <insert id="addTask" parameterType="com.transing.mcss4dpm.integration.bo.Task"
+            useGeneratedKeys="true"
+            keyProperty="taskId">
+        INSERT INTO task_crawl (pid,detailid,projectid,firstdetailid,flowid,taskname,datasource,datatype,inputpara,completenu,tasknu,status,batchno,starttime,createtime,completetime)
+        VALUES
+        (#{pId},#{detailId},#{projectId},#{firstDetailId},#{flowId},#{taskName},#{dataSource},#{dataType},#{inputPara},#{completeNu},#{taskNu},#{status},#{batchNo},now(), now(),now())
+    </insert>
+
+    <insert id="addSubTaskList" parameterType="java.util.List"
+            useGeneratedKeys="true">
+        INSERT INTO sub_task
+        (taskid,dealclass,datasource,datatype,inputpara,status,createtime)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.taskId},#{item.dealClass},#{item.dataSource},#{item.dataType},#{item.inputPara},#{item.status},now())
+        </foreach>
+    </insert>
+
+
+    <insert id="addSubTask" parameterType="com.transing.mcss4dpm.integration.bo.SubTask"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO sub_task
+        (taskid,dealclass,datasource,datatype,inputpara,status,createtime)
+        VALUES
+        (#{taskId},#{dealClass},#{dataSource},#{dataType},#{inputPara},#{status},now())
+    </insert>
+
+    <select id="getSubTaskBySubId" parameterType="java.util.Map"
+            resultType="com.transing.mcss4dpm.integration.bo.SubTask">
+        SELECT id,taskid,dealclass,datasource,datatype,status FROM sub_task
+        WHERE
+        id = #{subTaskId}
+    </select>
+
+    <select id="getDealClasseList"
+            resultType="com.transing.mcss4dpm.integration.bo.DealClass">
+        SELECT id,dealclass,datasource,datatype FROM processor
+    </select>
+
+    <select id="getDevicesList" parameterType="java.util.Map"
+            resultType="com.transing.mcss4dpm.integration.bo.DevicesInf">
+        SELECT id, devicesname,serialnumber,registserver,height,width,funcation,mobiletype FROM devices_config
+        where registserver = #{registServer}
+         <if test="funcation != null and funcation != '' ">
+             AND  funcation = #{funcation}
+         </if>
+    </select>
+
+    <select id="getDevicesByServerList"
+            parameterType="com.transing.mcss4dpm.integration.bo.DevicesInf"
+            resultType="com.transing.mcss4dpm.integration.bo.DevicesInf">
+        SELECT id, devicesname,serialnumber,registserver,height,width,funcation,mobiletype FROM devices_config
+        WHERE
+        1=1
+        <if test="devicesName != null and devicesName!=''">
+            AND devicesname=#{devicesName}
+        </if>
+        <if test="serialNumber != null and serialNumber!=''">
+            AND serialnumber=#{serialNumber}
+        </if>
+        <if test="registServer != null and registServer!=''">
+            AND registserver=#{registServer}
+        </if>
+        <if test="funcation != null and funcation!=''">
+            AND funcation=#{funcation}
+        </if>
+    </select>
+
+    <update id="updateSubTaskStatus" parameterType="java.util.Map">
+        update sub_task set status = #{status} where id = #{subTaskId}
+    </update>
+
+    <update id="updateTaskNu" parameterType="java.util.Map">
+        update task_crawl set tasknu = #{taskNu} where taskid = #{taskId}
+    </update>
+
+    <update id="updateTaskById" parameterType="java.util.Map">
+        update task_crawl
+        <set>
+            <if test="null != status and status!=''">
+                status = #{status},
+            </if>
+            <if test="null != completeNu and completeNu!=''">
+                completenu = #{completeNu},
+            </if>
+        </set>
+        where taskid = #{taskId}
+    </update>
+
+</mapper>

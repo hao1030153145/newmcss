@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+	
+    <!-- 设置属性可以注入系统的属性变量 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="searchSystemEnvironment" value="true"/>
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+    </bean>
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
+            <bean id="messageConverter"
+                  class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper" ref="jacksonObjectMapper"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <bean id="jacksonObjectMapper" class="com.fasterxml.jackson.databind.ObjectMapper"/>
+
+    <!-- 全局异常定义 -->
+    <bean id="mySystemCode" class="com.transing.mcss4dpm.web.exception.MySystemCode"/>
+    <bean class="com.jeeframework.webframework.exception.GlobalHandlerExceptionResolver">
+        <property name="systemCode" ref="mySystemCode"></property>
+    </bean>
+
+
+    <!-- 用于持有ApplicationContext,可以使用SpringContextHolder.getBean('xxxx')的静态方法得到spring bean对象 -->
+    <bean class="com.jeeframework.core.context.support.SpringContextHolder" lazy-init="false"/>
+
+    <!--     注解说明   -->
+    <context:annotation-config/>
+
+    <import resource="swaggerConfig-${conf.apidoc}.xml"/>
+    <!--  @Controller 声明Action组件
+     @Service    声明Service组件    @Service("myMovieLister")
+     @Repository 声明Dao组件
+     @Component   泛指组件, 当不好归类时.
+     @RequestMapping("/menu")  请求映射
+     @Resource  用于注入，( j2ee提供的 ) 默认按名称装配，@Resource(name="beanName")
+     @Autowired 用于注入，(spring提供的) 默认按类型装配
+     @Transactional( rollbackFor={Exception.class}) 事务管理
+     @ResponseBody
+     @Scope("prototype")   设定bean的作用域 -->
+    <context:component-scan
+            base-package="com.transing.mcss4dpm.web.controller,com.jeeframework.webframework.controller,com.transing.mcss4dpm.web.inteceptor"/>
+
+    <mvc:resources mapping="/images/**" location="/images/" cache-period="31556926"/>
+    <mvc:resources mapping="/js/**" location="/js/" cache-period="31556926"/>
+    <mvc:resources mapping="/css/**" location="/css/" cache-period="31556926"/>
+
+    <bean name="handlerAdapter"
+          class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <!--<property name="messageConverters">
+            <list>
+                 <ref bean="byteArray_hmc" />
+                <ref bean="string_hmc" />
+            </list>
+        </property>-->
+    </bean>
+    <!-- <bean id="byteArray_hmc" class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />处理..
+    <bean id="string_hmc" class="org.springframework.http.converter.StringHttpMessageConverter" />处理..  -->
+    <!--     <bean name="handlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"> -->
+    <!-- 只会拦截@RequestMapping的URL
+    <property name="interceptors">
+         <list>
+             <bean class="com.mvc.MyInteceptor"></bean>
+         </list>
+     </property> -->
+    <!--     </bean>   -->
+
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver"
+          p:defaultEncoding="UTF-8"/>
+
+    <!-- definition of View Resolver -->
+    <bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass">
+            <value>org.springframework.web.servlet.view.JstlView</value>
+        </property>
+        <property name="prefix">
+            <value>/WEB-INF/jsp/</value>
+        </property>
+        <property name="suffix">
+            <value>.jsp</value>
+        </property>
+        <property name="order" value="1"></property>
+    </bean>
+
+    <!--     freemarker的配置   -->
+    <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <property name="templateLoaderPath" value="file:${conf.templ.path}"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="freemarkerSettings">
+            <props>
+                <prop key="template_update_delay">10</prop>
+                <prop key="locale">zh_CN</prop>
+                <prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+                <prop key="date_format">yyyy-MM-dd</prop>
+                <prop key="number_format">#.##</prop>
+            </props>
+        </property>
+    </bean>
+    <!--     FreeMarker视图解析 如返回userinfo。。在这里配置后缀名ftl和视图解析器。。  #{systemProperties['JAVA_MY_ENV']} -->
+    <bean id="freeMarkerViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+        <property name="order" value="0"></property>
+        <property name="viewClass" value="org.springframework.web.servlet.view.freemarker.FreeMarkerView"/>
+        <property name="cache" value="true"/>
+        <property name="prefix" value="/"/>
+        <property name="suffix" value=".html"/>
+        <property name="contentType" value="text/html;charset=UTF-8"/>
+        <property name="exposeRequestAttributes" value="true"/>
+        <property name="exposeSessionAttributes" value="true"/>
+        <property name="exposeSpringMacroHelpers" value="true"/>
+		<property name="requestContextAttribute" value="request"/>
+    </bean>
+
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
+          p:basename="i18n/messages"/>
+
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**.html"/>
+            <mvc:mapping path="/**/*.html"/>
+            <mvc:exclude-mapping path="/"/>
+            <mvc:exclude-mapping path="/api.html"/>
+            <mvc:exclude-mapping path="/api/index.html"/>
+            <bean class="com.transing.mcss4dpm.web.inteceptor.HtmlLoginInterceptor"></bean>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/**.json"/>
+            <mvc:mapping path="/**/*.json"/>
+            <mvc:exclude-mapping path="/"/>
+            <mvc:exclude-mapping path="/login.json"/>
+            <bean class="com.transing.mcss4dpm.web.inteceptor.AjaxLoginInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!-- 总错误处理
+    这里主要的类是SimpleMappingExceptionResolver类，和他的父类AbstractHandlerExceptionResolver类。
+    具体可以配置哪些属性，我是通过查看源码知道的。
+    你也可以实现HandlerExceptionResolver接口，写一个自己的异常处理程序。
+    <bean id="exceptionResolver" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="defaultErrorView">
+           <value>/error/error</value> error页面可以通过Exception e = (Exception)request.getAttribute("exception")获得异常信息
+        </property>
+        <property name="defaultStatusCode">
+           <value>500</value>
+        </property>
+        <property name="warnLogCategory">
+           <value>org.springframework.web.servlet.handler.SimpleMappingExceptionResolver</value>
+        </property>
+    </bean>-->
+
+    <mvc:default-servlet-handler/>
+
+
+    <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <ref bean="mappingJacksonHttpMessageConverter"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="mappingJacksonHttpMessageConverter"
+          class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>application/json;charset=UTF-8</value>
+            </list>
+        </property>
+    </bean>
+
+
+</beans>

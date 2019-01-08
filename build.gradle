@@ -1,0 +1,212 @@
+buildscript {
+    repositories {
+        maven { url "http://libs.dookoo.net/repository/maven-public/" }
+        maven { url "http://maven.aliyun.com/nexus/content/repositories/gradle-plugin/" }
+
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:1.2'
+    }
+}
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'war'
+apply plugin: 'idea'
+apply plugin: 'org.sonarqube'
+apply plugin: 'jacoco'
+
+ext {
+    extVersion = new Properties()
+    extVersion.load(new FileInputStream("$project.rootDir/src/main/resources/version.properties"))
+
+    println "使用版本号 extVersion versionCode = " + extVersion.getProperty("version_number")
+
+    if (null == extVersion.getProperty("version_number")) {
+        throw new GradleException('没有配置程序版本号，请在gradle.properites里配置version_number')
+    }
+    CODE_VERSION = extVersion.version_number
+
+}
+
+group = 'transing.cn'
+
+version = CODE_VERSION
+
+description = """mcss4dpm Maven Webapp"""
+
+println "使用版本号 versionCode = " + version
+
+webAppDirName = 'src/main/webapp'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+//兼容过期的图像处理包
+compileJava {
+    options.fork = true
+    options.forkOptions.executable = "javac" // assumes that javac is on PATH
+    options.compilerArgs << "-XDignore.symbol.file"
+}
+
+compileTestJava {
+    options.fork = true
+    options.forkOptions.executable = "javac" // assumes that javac is on PATH
+    options.compilerArgs << "-XDignore.symbol.file"
+}
+
+
+
+sonarqube {
+
+    properties {
+        property "sonar.projectName", "mcss4dpm"
+        property "sonar.projectKey", "org.sonarqube:mcss4dpm"
+        property "sonar.host.url", "http://codecheck.dookoo.net"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.projectVersion", CODE_VERSION
+        property "sonar.language", "java"
+        property "sonar.java.source", "7"
+        property "sonar.login", "sonar"
+        property "sonar.password", "sonar9912"
+        property "sonar.sources", "src/main/"
+        property "sonar.exclusions", "src/main/**/integration/bo/*,src/main/**/web/po/*,src/main/**/web/form/*,src/main/**/web/filter/*"
+        property "sonar.coverage.exclusions", "src/main/**/constant/*,src/main/**/net/**,src/main/**/biz/**,src/main/**/integration/**,src/main/**/web/apidoc/*"
+        property "sonar.binaries", "$buildDir/classes/main"
+        property "sonar.dynamicAnalysis", "reuseReports"
+        property "sonar.junit.reportsPath", "$buildDir/test-results"
+        property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.jacoco.reportPaths", "$buildDir/jacoco/test.exec"
+//        property "sonar.tests", "$buildDir/classes/test"
+//        property "sonar.scm.provider", "git"
+        property "sonar.scm.enabled", "false"
+//        property "sonar.scm.enabled", "true"
+        property "sonar.scm.url", "scm:git:http://code.dookoo.net/root/mcss4dpm.git"
+    }
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDir 'src/main/resources'
+            include '**/*'
+//            include '**/*.xml'
+
+            srcDir 'src/main/java'
+            include '**/*.js'
+            exclude '**/*.java'
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    maven { url "http://libs.dookoo.net/repository/maven-public/" }
+    mavenCentral()
+}
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+    compile group: 'com.jeeframework', name: 'jeeutil', version: '0.0.8'
+    compile(group: 'com.jeeframework', name: 'jeeframework', version: '0.0.14-SNAPSHOT', changing: true
+    ) {
+        exclude(module: 'spring')
+        exclude(module: 'ibatis-sqlmap')
+        exclude(module: 'ibatis-core')
+        exclude(module: 'javax.el')
+        exclude(module: 'jackson-databind')
+    }
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile group: 'org.apache.mina', name: 'mina-core', version: '2.0.13'
+
+    compile group: 'org.springframework', name: 'spring-core', version: '4.2.5.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context-support', version: '4.2.5.RELEASE'
+    compile group: 'org.springframework', name: 'spring-beans', version: '4.2.5.RELEASE'
+    compile group: 'org.springframework', name: 'spring-webmvc', version: '4.2.5.RELEASE'
+    compile group: 'org.springframework', name: 'spring-tx', version: '4.2.5.RELEASE'
+    compile group: 'org.springframework', name: 'spring-context', version: '4.2.5.RELEASE'
+    compile group: 'org.springframework', name: 'spring-web', version: '4.2.5.RELEASE'
+    compile group: 'org.springframework', name: 'spring-jdbc', version: '4.2.5.RELEASE'
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.9.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.9.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.9.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.9.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.9.1'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.4.1'
+    compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.4.1'
+
+    compile group: 'com.alibaba', name: 'druid', version: '1.0.27'
+
+    compile group: 'org.mybatis', name: 'mybatis', version: '3.2.8'
+    compile group: 'org.mybatis', name: 'mybatis-spring', version: '1.2.2'
+
+    compile group: 'org.mongodb', name: 'mongodb-driver', version: '3.2.0-rc0'
+
+    compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
+
+
+    compile group: 'org.apache.poi', name: 'poi', version: '3.10.1'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.10.1'
+
+    compile group: 'com.mangofactory', name: 'swagger-springmvc', version: '1.0.2'
+    compile group: 'org.webjars.bower', name: 'swagger-ui', version: '2.1.8-M1'
+
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.6.3'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.3'
+    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-jaxb-annotations', version: '2.6.3'
+    compile 'com.alibaba:fastjson:1.2.24'
+
+    compile group: 'mysql', name: 'mysql-connector-java', version: '6.0.6'
+
+    compile group: 'junit', name: 'junit', version: '4.12'
+
+    compile group: 'com.jeeframework', name: 'jeetask', version: '0.0.2-SNAPSHOT', changing: true
+    compile group: 'net.sourceforge.htmlcleaner', name: 'htmlcleaner', version: '2.2'
+
+    compile group: 'io.appium', name: 'java-client', version: '5.0.0-BETA2'
+    compile group: 'org.openqa.selenium', name: 'selenium-server', version: '3.0.1'
+    compile group: 'org.mozilla', name: 'rhino', version: '1.7R3'
+
+    runtime group: 'org.aspectj', name: 'aspectjweaver', version: '1.5.4'
+    runtime group: 'javax.servlet', name: 'jstl', version: '1.2'
+//    去掉tomcat工程引用报错的jar包 http://stackoverflow.com/questions/20707543/gradle-how-to-exclude-jar-from-a-war
+    runtime(group: 'org.eclipse.jetty', name: 'jetty-jsp', version: '9.2.10.v20150310')
+    runtime group: 'taglibs', name: 'standard', version: '1.1.2'
+    testCompile group: 'org.springframework', name: 'spring-test', version: '4.2.2.RELEASE'
+    testCompile 'org.awaitility:awaitility:2.0.0'
+}
+
+test {
+    systemProperty "conf.env", System.getProperty("conf.env") ? System.getProperty("conf.env") : "local"
+}
+
+tasks.withType(Test) { task ->
+    jacoco {
+        append = false
+    }
+}
+
+war {
+    classpath = classpath.filter { file ->
+        println file.name
+        (
+                !file.name.startsWith('jetty-jsp') &&
+                        !file.name.startsWith('standard')
+        )
+    }
+}
