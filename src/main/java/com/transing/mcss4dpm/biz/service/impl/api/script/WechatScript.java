@@ -33,6 +33,7 @@ public class WechatScript {
     public List<WechatBO> operateProcess(AppiumSettingBo appiumSettingBo) throws InterruptedException, IOException {
         boolean tryLoopNu = true;
 
+
         byte[] bytes = driver.getScreenshotAs(OutputType.BYTES);
         driver.findElementById("com.tencent.mm:id/a2c").click();//点击发送
         //延迟0.3秒,为了等待消息发送显示到对话框中
