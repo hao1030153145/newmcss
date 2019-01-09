@@ -1,10 +1,5 @@
 package com.transing.mcss4dpm.constant;
 
-import com.transing.mcss.integration.bo.BossUser;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 
  *
@@ -24,9 +19,6 @@ public class Constants {
 
     public static final String WEB_LOGIN_KEY = "WEIXIN_VERIFY_KEY";
     public static final String LINK_USER_COOKIE_LOGIN = "lk_sess";
-
-    // 用于自动登录，后续采用分离式cache
-    protected static final Map<String, BossUser> SESSION_CACHE = new HashMap<>();
 
 
     /**

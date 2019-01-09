@@ -2,7 +2,6 @@ package com.transing.mcss4dpm.job.DealClass;
 
 import com.jeeframework.logicframework.integration.sao.zookeeper.BaseSaoZookeeper;
 import com.jeeframework.webframework.exception.WebException;
-import com.transing.mcss4dpm.JobEvent.Bo.ScriptTask;
 import com.transing.mcss4dpm.biz.service.impl.api.DriverManager2;
 import com.transing.mcss4dpm.biz.service.impl.api.bo.AppiumDriverManager;
 import com.transing.mcss4dpm.web.exception.MySystemCode;
@@ -24,10 +23,10 @@ public class ReleaseDevices {
         return inst;
     }
 
-    public void execue(ScriptTask task) {
-        BaseSaoZookeeper baseSaoZookeeper = task.getBaseSaoZookeeper();
-        String deviceId = task.getDeviceId();
-        String serverName = task.getServerName();
+    public void execue(String task) {
+        BaseSaoZookeeper baseSaoZookeeper =null;
+        String deviceId = null;
+        String serverName = null;
         DriverManager2 driverManager2 = DriverManager2.getInstance();
         AppiumDriverManager driverManager = driverManager2.getDriverByDevicesId(Long.parseLong(deviceId));
         driverManager2.releaseAppiumDriver(driverManager);

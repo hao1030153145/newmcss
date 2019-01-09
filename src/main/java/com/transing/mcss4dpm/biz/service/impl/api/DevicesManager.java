@@ -25,8 +25,8 @@ public class DevicesManager implements LinuxCommandImpl {
                 while (in.hasNext()) {
                     String processInf = in.nextLine();
                     if (processInf.contains(":")) {
-                        String ip = processInf.trim().split("：")[0];
-                        ip = ip.replaceAll("[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……& ;*（）——+|{}【】‘；：”“’。，、？|-]", "") + ":5555";
+                        String ip = processInf.trim().split(":")[0];
+                        ip = ip + ":5555";
                         System.out.println("通过adb devices命令获得ip为：" + ip);
                         devicesNameList.add(ip);
                     }
@@ -39,6 +39,7 @@ public class DevicesManager implements LinuxCommandImpl {
     // 通过命令模式 adb devices 获得连接的设备ip
     public void improtContacts(List<String> devicesName, String path) {
 
+        System.out.println("进入通讯录导入方法, 通讯录文件路径为：" + path);
         for (String str : devicesName) {
             try {
                 ShellProcess shellProcess1 = executeShell("adb -s " + str + " shell pm clear com.android.providers.contacts");
@@ -48,8 +49,8 @@ public class DevicesManager implements LinuxCommandImpl {
                     Scanner in = getShellResultContent(shellProcess3.getProcess());
                     System.out.println(in);
                 }
-            }catch (Exception e){
-                System.out.println("下面是导入通讯录报的错误："+ e);
+            } catch (Exception e) {
+                System.out.println("下面是导入通讯录报的错误：" + e);
             }
 
         }

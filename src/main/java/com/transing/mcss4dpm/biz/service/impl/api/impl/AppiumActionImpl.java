@@ -20,9 +20,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * ${description}
@@ -160,87 +157,6 @@ public abstract class AppiumActionImpl<T extends WebElement> implements AppiumFi
     public void moveObvious(AndroidDriver driver, int startX, int startY, int endX, int endY) {
         System.out.println("滑动   >>>>>>>>>> " + "[" + startX + "," + startY + "]" + "[" + endX + "," + endY + "]");
         driver.swipe(startX, startY, endX, endY, 1000);
-    }
-
-    /**
-     * 简单描述:切换
-     */
-    public void changeContext(AndroidDriver driver, String pid, String value, String devicesName) {
-        try {
-            //为等待页面加载完成默认暂停2s
-            Thread.sleep(1 * 1000);
-        } catch (InterruptedException e) {
-            System.out.println(devicesName + ": 暂停出错");
-            e.printStackTrace();
-        }
-        String changeValue = getContextValue(driver, value);
-        System.out.println(devicesName + "切换context到   >>>>>>>>>> " + changeValue);
-        String chromeDriverId = null;
-        int tryTime = 0;
-        while (true) {
-            if (tryTime > 8) {
-                break;
-            }
-            try {
-
-                Future<Integer> future = Executors.newSingleThreadExecutor().submit(() -> {
-                    System.out.print("=====================================进入submit=================================");
-                    driver.context(changeValue);
-                    System.out.print("=====================================进入submit=================================");
-                    return 1;
-                });
-                future.get(6, TimeUnit.SECONDS);
-                System.out.println(devicesName + ": context change   >>>>>>>>>>   succeful");
-                break;
-            } catch (Exception e) {
-                System.out.println("=================================下面是转切换异常信息=========================================");
-                e.printStackTrace();
-                System.out.println("=================================上面是转切换异常信息=========================================");
-                System.out.println(devicesName + ": context change   >>>>>>>>>>   error!!!!");
-                Process process = executeShell("pstree " + pid + " -p", true).getProcess();
-                System.out.println("执行shell命令1=====================" + "pstree " + pid + " -p");
-                Scanner in = new Scanner(process.getInputStream());
-                while (in.hasNext()) {
-                    String processInf = in.nextLine();
-                    if (processInf.contains("chromedriver_64")) {
-                        String id = processInf.trim().split("chromedriver_64")[1];
-                        id = id.split("-\\+-")[0];
-                        id = id.replaceAll("[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……& ;*（）——+|{}【】‘；：”“’。，、？|-]", "");
-                        chromeDriverId = id;
-                    }
-                }
-
-                if (chromeDriverId != null) {
-                    if (!chromeDriverId.equals("")) {
-                        executeShell("kill -s 9 " + chromeDriverId, true);
-                        System.out.println("执行shell命令1=====================" + "kill -s 9 " + chromeDriverId);
-                    }
-                }
-            }
-            tryTime++;
-        }
-
-        if (changeValue != null && changeValue.contains("NATIVE_APP")) {
-            Process process = executeShell("pstree " + pid + " -p", true).getProcess();
-            System.out.println("执行shell命令1=====================" + "pstree " + pid + " -p");
-            Scanner in = new Scanner(process.getInputStream());
-            while (in.hasNext()) {
-                String processInf = in.nextLine();
-                if (processInf.contains("chromedriver_64")) {
-                    String id = processInf.trim().split("chromedriver_64")[1];
-                    id = id.split("-\\+-")[0];
-                    id = id.replaceAll("[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……& ;*（）——+|{}【】‘；：”“’。，、？|-]", "");
-                    chromeDriverId = id;
-                }
-            }
-
-            if (chromeDriverId != null) {
-                if (!chromeDriverId.equals("")) {
-                    executeShell("kill -s 9 " + chromeDriverId, true);
-                    System.out.println("执行shell命令2=====================" + "kill -s 9 " + chromeDriverId);
-                }
-            }
-        }
     }
 
     /**

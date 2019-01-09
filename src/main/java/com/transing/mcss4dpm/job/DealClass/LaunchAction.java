@@ -1,7 +1,6 @@
 package com.transing.mcss4dpm.job.DealClass;
 
 import com.alibaba.fastjson.JSON;
-import com.transing.mcss4dpm.JobEvent.Bo.ScriptTask;
 import com.transing.mcss4dpm.biz.service.impl.api.AppiumAction;
 import com.transing.mcss4dpm.biz.service.impl.api.DriverManager2;
 import com.transing.mcss4dpm.biz.service.impl.api.bo.ActionBo;
@@ -31,9 +30,9 @@ public class LaunchAction {
         return inst;
     }
 
-    public void execue(ScriptTask task) {
-        String dataTypeId = task.getDataTypeId();
-        String param = task.getParam();
+    public void execue(String task) {
+        String dataTypeId = null;
+        String param = null;
 
         ActionBo subTaskParam = JSON.parseObject(param, ActionBo.class);
         String elementType = subTaskParam.getElementType();

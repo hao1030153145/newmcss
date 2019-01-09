@@ -135,23 +135,23 @@
           p:basename="i18n/messages"/>
 
 
-    <mvc:interceptors>
-        <mvc:interceptor>
-            <mvc:mapping path="/**.html"/>
-            <mvc:mapping path="/**/*.html"/>
-            <mvc:exclude-mapping path="/"/>
-            <mvc:exclude-mapping path="/api.html"/>
-            <mvc:exclude-mapping path="/api/index.html"/>
-            <bean class="com.transing.mcss4dpm.web.inteceptor.HtmlLoginInterceptor"></bean>
-        </mvc:interceptor>
-        <mvc:interceptor>
-            <mvc:mapping path="/**.json"/>
-            <mvc:mapping path="/**/*.json"/>
-            <mvc:exclude-mapping path="/"/>
-            <mvc:exclude-mapping path="/login.json"/>
-            <bean class="com.transing.mcss4dpm.web.inteceptor.AjaxLoginInterceptor"></bean>
-        </mvc:interceptor>
-    </mvc:interceptors>
+    <!--<mvc:interceptors>-->
+        <!--<mvc:interceptor>-->
+            <!--<mvc:mapping path="/**.html"/>-->
+            <!--<mvc:mapping path="/**/*.html"/>-->
+            <!--<mvc:exclude-mapping path="/"/>-->
+            <!--<mvc:exclude-mapping path="/api.html"/>-->
+            <!--<mvc:exclude-mapping path="/api/index.html"/>-->
+            <!--<bean class="com.transing.mcss4dpm.web.inteceptor.HtmlLoginInterceptor"></bean>-->
+        <!--</mvc:interceptor>-->
+        <!--<mvc:interceptor>-->
+            <!--<mvc:mapping path="/**.json"/>-->
+            <!--<mvc:mapping path="/**/*.json"/>-->
+            <!--<mvc:exclude-mapping path="/"/>-->
+            <!--<mvc:exclude-mapping path="/login.json"/>-->
+            <!--<bean class="com.transing.mcss4dpm.web.inteceptor.AjaxLoginInterceptor"></bean>-->
+        <!--</mvc:interceptor>-->
+    <!--</mvc:interceptors>-->
 
     <!-- 总错误处理
     这里主要的类是SimpleMappingExceptionResolver类，和他的父类AbstractHandlerExceptionResolver类。

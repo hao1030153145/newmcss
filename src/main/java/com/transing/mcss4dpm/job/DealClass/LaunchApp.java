@@ -1,6 +1,5 @@
 package com.transing.mcss4dpm.job.DealClass;
 
-import com.transing.mcss4dpm.JobEvent.Bo.ScriptTask;
 import com.transing.mcss4dpm.biz.service.impl.api.AppiumAction;
 import com.transing.mcss4dpm.biz.service.impl.api.DriverManager2;
 import com.transing.mcss4dpm.biz.service.impl.api.bo.*;
@@ -30,10 +29,10 @@ public class LaunchApp {
         return inst;
     }
 
-    public void execue(ScriptTask task) {
+    public void execue(String task) {
 
-        String dataTypeId = task.getDataTypeId();
-        String deviceId = task.getDeviceId();
+        String dataTypeId = null;
+        String deviceId = null;
 
         //初始化/获取drverManager
         DriverManager2 driverManager = DriverManager2.getInstance();

@@ -16,7 +16,7 @@
     <description>定义业务层和集成层对象，包括Action、Service、BO、DAO、SAO、JNDI资源</description>
 
     <context:component-scan
-            base-package="com.transing.mcss4dpm.util,com.transing.mcss4dpm.biz.service.impl.api,com.transing.mcss4dpm.JobEvent,com.transing.mcss4dpm.job.DealClass"/>
+            base-package="com.transing.mcss4dpm.util,com.transing.mcss4dpm.biz.service.impl.api,com.transing.mcss4dpm.JobEvent,com.transing.mcss4dpm.job.DealClass,com.transing.mcss4dpm.biz.service.impl.local,com.transing.mcss4dpm.integration.impl.ibatis,com.transing.mcss4dpm.JobEvent"/>
 
     <!--===================================================================== -->
     <!-- 配置外部变量文件 -->
@@ -35,50 +35,70 @@
         <property name="properties" ref="configProperties"/>
     </bean>
 
+    <!--===================================================================== -->
+    <!-- 数据源定义，具体具体情况选择是否多数据源 -->
+    <!--===================================================================== -->
+    <bean id="dsFactory" class="com.jeeframework.logicframework.integration.dao.datasource.DataSourceFactory">
+        <property name="targetDataSources">
+            <map key-type="java.lang.String">
+                <entry key="dataDB" value-ref="dataSource"/>
+            </map>
 
-    <bean id="jeeTaskServer" class="com.transing.mcss4dpm.JobEvent.McssJeeTaskServer" init-method="start">
-        <property name="zookeeperConnectionString" value="${jeetask.zookeeperConnectionString}"/>
-        <property name="zookeeperEmbedPort" value="${jeetask.zookeeperEmbedPort}"/>
-        <property name="zookeeperJobNamespace" value="${jeetask.zookeeperJobNamespace}"/>
-        <property name="jobEventProcessorClass" value="${jeetask.jobEventStorageApiClass}"/>
-        <property name="jobEventProcessorType" value="${jeetask.jobEventProcessorType}"/>
+        </property>
+        <property name="defaultTargetDataSource" ref="dataSource"/>
+
     </bean>
 
-    <bean id="jeeTaskClient" class="com.jeeframework.jeetask.startup.JeeTaskClient" init-method="start">
-        <property name="zookeeperConnectionString" value="${jeetask.zookeeperConnectionString}"/>
-        <property name="zookeeperEmbedPort" value="${jeetask.zookeeperEmbedPort}"/>
-        <property name="zookeeperJobNamespace" value="${jeetask.zookeeperJobNamespace}"/>
-        <property name="jobEventProcessorClass" value="${jeetask.jobEventStorageApiClass}"/>
-        <property name="jobEventProcessorType" value="${jeetask.jobEventProcessorType}"/>
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password -->
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="1"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxActive" value="10"/>
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000"/>
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="100000"/>
+
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+
     </bean>
 
-    <!--<bean id="baseSaoHDFS" class="com.jeeframework.logicframework.integration.sao.hdfs.BaseSaoHDFS">-->
-        <!--<property name="hdfsAddress" value="${hadoop.hdfsAddress}"/>-->
-        <!--<property name="userName"  value="${hadoop.username}" />-->
-    <!--</bean>-->
-
-    <bean id="kafkaConsumer" class="com.transing.mcss4dpm.job.BaseKafkaConsumerImpl">
-        <property name="kafkaZookeeperConnect" value="${kafka.zookeeper.connect}"/>
-        <property name="kafkaZookeeperNamespace" value="${kafka.zookeeper.namespace}"/>
-        <property name="topic" value="${kafka.topic}"/>
-        <property name="groupId" value="${kafka.groupId}"/>
-        <property name="kafkaNamespace" value="${kafka.namespace}"/>
+    <!--===================================================================== -->
+    <!-- iBATIS 配置文件定义 -->
+    <!--===================================================================== -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dsFactory"/>
+        <property name="configLocation" value="classpath:config/sqlmap-config.xml"/>
+        <property name="mapperLocations" value="classpath*:config/conf-sqlmap/sqlmap-mapping*.xml"/>
     </bean>
 
-    <bean id="kafkaConsumeDevice" class="com.transing.mcss4dpm.job.BaseKafkaConsumerImpl" >
-        <property name="kafkaZookeeperConnect" value="${kafka.zookeeper.connect}"/>
-        <property name="kafkaZookeeperNamespace" value="${kafka.zookeeper.namespace}"/>
-        <property name="topic" value="${kafka.device.topic}"/>
-        <property name="groupId" value="${kafka.device.groupId}"/>
-        <property name="kafkaNamespace" value="${kafka.namespace}"/>
+    <!-- 配置SqlSessionTemplate -->
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
     </bean>
 
-    <bean id="baseSaoZookeeper" class="com.jeeframework.logicframework.integration.sao.zookeeper.BaseSaoZookeeper">
-        <property name="zookeeperConnectionString" value="${sao.zookeeperConnectionString}"/>
-        <property name="zookeeperNamespace" value="${sao.zookeeperNamespace}"/>
-        <property name="zookeeperUserName" value="${sao.zookeeperUserName}"/>
-        <property name="zookeeperPassword" value="${sao.zookeeperPassword}"/>
-        <property name="isCached" value="${sao.isCached}"/>
+
+    <!--===================================================================== -->
+    <!-- 事务 配置文件定义 -->
+    <!--===================================================================== -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dsFactory"/>
     </bean>
 
 </beans>

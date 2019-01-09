@@ -17,7 +17,7 @@
 
 
     <context:component-scan
-            base-package="com.transing.mcss4dpm.util,com.transing.mcss4dpm.biz.service.impl.local,com.transing.mcss4dpm.integration.impl.ibatis,com.transing.mcss4dpm.JobEvent,com.transing.mcss4dpm.job.DealClass"/>
+            base-package="com.transing.mcss4dpm.util,com.transing.mcss4dpm.biz.service.impl.api,com.transing.mcss4dpm.job.DealClass,com.transing.mcss4dpm.biz.service.impl.local,com.transing.mcss4dpm.integration.impl.ibatis"/>
     <!--===================================================================== -->
     <!-- 配置外部变量文件 -->
     <!--===================================================================== -->
@@ -118,40 +118,6 @@
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dsFactory"/>
-    </bean>
-
-    <bean id="jeeTaskServer" class="com.transing.mcss4dpm.JobEvent.McssJeeTaskServer" init-method="start">
-        <property name="dataSource" ref="dsFactory"/>
-        <property name="zookeeperConnectionString" value="${jeetask.zookeeperConnectionString}"/>
-        <property name="zookeeperEmbedPort" value="${jeetask.zookeeperEmbedPort}"/>
-        <property name="zookeeperJobNamespace" value="${jeetask.zookeeperJobNamespace}"/>
-        <property name="jobEventProcessorClass" value="${jeetask.jobEventStorageClass}"/>
-    </bean>
-
-    <bean id="jeeTaskClient" class="com.jeeframework.jeetask.startup.JeeTaskClient" init-method="start">
-        <property name="dataSource" ref="dsFactory"/>
-        <property name="zookeeperConnectionString" value="${jeetask.zookeeperConnectionString}"/>
-        <property name="zookeeperEmbedPort" value="${jeetask.zookeeperEmbedPort}"/>
-        <property name="zookeeperJobNamespace" value="${jeetask.zookeeperJobNamespace}"/>
-        <property name="jobEventProcessorClass" value="${jeetask.jobEventStorageClass}"/>
-    </bean>
-
-    <bean id="baseSaoHDFS" class="com.jeeframework.logicframework.integration.sao.hdfs.BaseSaoHDFS">
-        <property name="hdfsAddress" value="${hadoop.hdfsAddress}"/>
-        <property name="userName"  value="${hadoop.username}" />
-    </bean>
-
-    <bean id="kafkaProducer" class="com.jeeframework.logicframework.biz.service.mq.producer.BaseKafkaProducer">
-        <property name="brokerList" value="${kafka.broker.list}"/>
-        <property name="kafkaNamespace" value="${kafka.namespace}"/>
-    </bean>
-
-    <bean id="baseSaoZookeeper" class="com.jeeframework.logicframework.integration.sao.zookeeper.BaseSaoZookeeper">
-        <property name="zookeeperConnectionString" value="${sao.zookeeperConnectionString}"/>
-        <property name="zookeeperNamespace" value="${sao.zookeeperNamespace}"/>
-        <property name="zookeeperUserName" value="${sao.zookeeperUserName}"/>
-        <property name="zookeeperPassword" value="${sao.zookeeperPassword}"/>
-        <property name="isCached" value="${sao.isCached}"/>
     </bean>
 
 </beans>

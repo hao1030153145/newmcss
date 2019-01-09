@@ -35,7 +35,9 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
     }
 
     private DriverManager2() {
+
         DevicesManager devicesManager = new DevicesManager();
+        // 通过adb 获得服务器的连接设备信息
         List<String> devicesInfoBoList = devicesManager.getAndroidDevices();
         int port = 4726;
         int bp = 4724;
@@ -43,7 +45,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
         for (int i = 0; i < devicesInfoBoList.size(); i++) {
             AppiumDriverManager appiumDriverManager = new AppiumDriverManager();
             DevicesInfoBo devicesInfoBo = new DevicesInfoBo();
-            devicesInfoBo.setDevicesName(devicesInfoBoList.get(0));
+            devicesInfoBo.setDevicesName(devicesInfoBoList.get(i));
             devicesInfoBo.setFuncation("taskCrawl");
             devicesInfoBo.setRegistServer("mcss_1");
             devicesInfoBo.setId((long)i);
@@ -440,7 +442,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
             } else {
                 actionValue = "1";
             }
-            appiumAction.changeContext(androidDriver, pid, actionValue, devicesName);
+            //appiumAction.changeContext(androidDriver, pid, actionValue, devicesName);
             appiumDriverManager.invoke();
             return;
         }

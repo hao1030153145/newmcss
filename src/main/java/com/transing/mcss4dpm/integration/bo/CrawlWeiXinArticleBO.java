@@ -1,6 +1,5 @@
 package com.transing.mcss4dpm.integration.bo;
 
-import com.transing.mcss.integration.bo.WeixinCommentBO;
 
 import java.util.List;
 

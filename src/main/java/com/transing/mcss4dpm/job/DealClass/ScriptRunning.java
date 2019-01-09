@@ -1,7 +1,6 @@
 package com.transing.mcss4dpm.job.DealClass;
 
 import com.alibaba.fastjson.JSON;
-import com.transing.mcss4dpm.JobEvent.Bo.McssTask;
 import com.transing.mcss4dpm.biz.service.impl.api.AppiumAction;
 import com.transing.mcss4dpm.biz.service.impl.api.CrawlAction;
 import com.transing.mcss4dpm.biz.service.impl.api.DriverManager2;
@@ -34,11 +33,11 @@ public class ScriptRunning {
         return inst;
     }
 
-    public void execue(McssTask task) {
-        String datasourceTypeId = task.getDataTypeId();
-        String subTaskid = task.getSubTaskId(); //子任务id
-        String param = task.getParam();
-        String workFlowId = task.getWorkFlowId();
+    public void execue(String task) {
+        String datasourceTypeId = null;
+        String subTaskid = null;
+        String param = null;
+        String workFlowId = null;
         System.out.println("workFlowId :>>>>>>>>>>>    " + workFlowId);
         System.out.println("datasourceTypeId :>>>>>>>>>>   " + datasourceTypeId);
         System.out.println("subTaskid :>>>>>>>>>>   " + subTaskid);

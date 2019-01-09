@@ -38,8 +38,7 @@ public class WeiXin {
         driverManager = DriverManager2.getInstance();
         // 获得设备状态
         List<AppiumDriverManager> appiumDriverManagerList = driverManager.getDriverListsByStatus("0");
-        if (appiumDriverManagerList == null) {
-            appiumAction.sleep(15 * 60 * 1000);
+        if (appiumDriverManagerList.size() == 0) {
             System.out.println("XXXX: location_mcss : 没有可用设备");
             return;
         }
