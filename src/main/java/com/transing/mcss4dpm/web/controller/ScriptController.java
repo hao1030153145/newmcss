@@ -11,8 +11,12 @@ package com.transing.mcss4dpm.web.controller;
 import com.transing.mcss4dpm.biz.service.ScriptService;
 import com.transing.mcss4dpm.biz.service.impl.api.bo.AppiumSettingBo;
 import com.transing.mcss4dpm.biz.service.impl.api.bo.ChromeOption;
+import com.transing.mcss4dpm.biz.service.impl.api.bo.WechatBO;
+import com.transing.mcss4dpm.biz.service.impl.api.bo.WechatBOs;
 import com.transing.mcss4dpm.integration.bo.ContactBO;
+import com.transing.mcss4dpm.job.DealClass.HelpClass;
 import com.transing.mcss4dpm.job.DealClass.WeiXin;
+import com.transing.mcss4dpm.util.FileUtil;
 import com.transing.mcss4dpm.web.po.AppVersionPO;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -42,18 +47,29 @@ public class ScriptController {
     @RequestMapping(value = "/importContacts.json", method = {RequestMethod.POST})
     @ResponseBody
     @ApiOperation(value = "导入通讯录", notes = "", response = AppVersionPO.class, position = 0)
-    public Map getAppVersionJSON(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+    public Map getAppVersionJSON(@RequestParam("files") MultipartFile contactFile,
+                                 HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         String path = request.getContextPath();
-        File file = new File(path + "content.vcf");//实例化File类对象
-        if (!file.exists()) {//文件判断，没有则生成
-            file.createNewFile();
+        File tempFile = new File(path + "content.vcf");//实例化File类对象
+        if (!tempFile.exists()){
+            tempFile.createNewFile();
         }
-        List<ContactBO> contactBOList = scriptService.getContactList();
-        ScriptController.content(file, contactBOList);//生成通讯录的方法
+        // 将传过来的文件变为file格式，然后读取内容hua
+        File file = new File(contactFile.getOriginalFilename());
+        List<ContactBO>  contactBOList = FileUtil.readFileByFile(contactFile);
+        // 下面这个是数据库操作
+//        String path = request.getContextPath();
+//        File file = new File(path + "content.vcf");//实例化File类对象
+//        if (!file.exists()) {//文件判断，没有则生成
+//            file.createNewFile();
+//        }
+//        List<ContactBO> contactBOList = scriptService.getContactList();
+        ScriptController.content(tempFile, contactBOList);//生成通讯录的方法
         WeiXin weiXin = new WeiXin();
         weiXin.importContacts(path + "content.vcf");
+        // 这个文件必须删掉，否则通讯录会叠加
+        tempFile.delete();
         return new HashMap();
     }
 
@@ -67,7 +83,7 @@ public class ScriptController {
         // 根据传入的数据，来启动对应的app
         switch (choseApp) {
             case "1":
-                weiXin.execueWeChat(weChatParam());
+                weiXin.executeWeChat(weChatParam());
                 break;
             case "2":
                 System.out.println("启动message");
@@ -80,6 +96,23 @@ public class ScriptController {
                 break;
         }
         return new HashMap();
+    }
+
+
+    @RequestMapping(value = "/getWeChatData.json", method = {RequestMethod.POST})
+    @ResponseBody
+    @ApiOperation(value = "查询微信数据", notes = "", response = AppVersionPO.class, position = 0)
+    public WechatBOs getWeChatData(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        // 方便在抓取中查看数据而写的接口
+        WechatBOs wechatBOs = new WechatBOs();
+
+        List<WechatBO> wechatBOList = scriptService.getWeChatData();
+        Integer count = scriptService.getWeChatDataCount();
+        wechatBOs.setWechatBOS(wechatBOList);
+        wechatBOs.setCount(count);
+        HelpClass.getWeChatData();
+        return wechatBOs;
     }
 
 
@@ -96,6 +129,9 @@ public class ScriptController {
         appiumSettingBo.setFullReset(false);
         appiumSettingBo.setPlatformName("Android");
         appiumSettingBo.setAutomationName("Appium");
+        appiumSettingBo.setAutoLaunch(false);
+        appiumSettingBo.setPlatformVersion("5.1");
+
 
         ChromeOption chromeOption = new ChromeOption();
         chromeOption.setAndroidActivity(".plugin.webview.ui.tools.WebViewUI");

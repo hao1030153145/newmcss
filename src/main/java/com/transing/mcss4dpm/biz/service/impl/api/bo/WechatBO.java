@@ -4,21 +4,31 @@ package com.transing.mcss4dpm.biz.service.impl.api.bo;
  * ${description}
  *
  * @author haolen
- * @version 1.0 2018/1/25
+ * @version 1.0 2019/1/9
  */
 public class WechatBO {
-    private String name;
-    private String region;
-    private String tag;
-    private String number;
-    private String sex;
 
-    public String getName() {
-        return name;
+    private String weChatName;   // 微信名
+    private String weChatId;     // 微信号
+    private String region;       // 地区
+    private String tag;          // 个性标签
+    private String contactName;  // 联系名 ，后面跟数据库的做匹配
+    private String sex;          // 性别
+
+    public String getWeChatName() {
+        return weChatName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setWeChatName(String weChatName) {
+        this.weChatName = weChatName;
+    }
+
+    public String getWeChatId() {
+        return weChatId;
+    }
+
+    public void setWeChatId(String weChatId) {
+        this.weChatId = weChatId;
     }
 
     public String getRegion() {
@@ -37,12 +47,12 @@ public class WechatBO {
         this.tag = tag;
     }
 
-    public String getNumber() {
-        return number;
+    public String getContactName() {
+        return contactName;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
     }
 
     public String getSex() {

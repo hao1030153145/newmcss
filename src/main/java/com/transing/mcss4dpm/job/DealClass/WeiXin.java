@@ -8,7 +8,7 @@ import com.transing.mcss4dpm.biz.service.impl.api.bo.AppiumSettingBo;
 import com.transing.mcss4dpm.biz.service.impl.api.bo.WechatBO;
 import com.transing.mcss4dpm.biz.service.impl.api.script.WechatScript;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,9 +30,12 @@ public class WeiXin {
 
     private DriverManager2 driverManager;
 
-    // 启动微信
-    public void execueWeChat(AppiumSettingBo appiumSettingBo)  {
 
+    // 启动微信
+    public List<List<WechatBO>> executeWeChat(AppiumSettingBo appiumSettingBo)  {
+
+        List<List<WechatBO>> weChatList2 = new ArrayList<>();
+        System.out.println("开始启动");
         AppiumAction appiumAction = new AppiumAction();
         // 实例化对象，并获得本机的连接设备
         driverManager = DriverManager2.getInstance();
@@ -40,24 +43,27 @@ public class WeiXin {
         List<AppiumDriverManager> appiumDriverManagerList = driverManager.getDriverListsByStatus("0");
         if (appiumDriverManagerList.size() == 0) {
             System.out.println("XXXX: location_mcss : 没有可用设备");
-            return;
+            return null;
         }
 
         for (AppiumDriverManager appiumDriverManager : appiumDriverManagerList){
+            List<WechatBO> weChatBOList = new ArrayList<>();
             // 再次实例化脚本对象
             WechatScript wechatScript = new WechatScript(appiumDriverManager, driverManager);
             try {
                 // 微信操作脚本，并获得最后抓取的数据
-                List<WechatBO> wechatBOList = wechatScript.operateProcess(appiumSettingBo);
-            } catch (InterruptedException | IOException e) {
-                System.out.println("一点资讯异常 >>>>>>>" + e);
+                weChatBOList = wechatScript.operateProcess(appiumSettingBo);
+                weChatList2.add(weChatBOList);
+            } catch (Exception e) {
+                System.out.println("执行异常 >>>>>>>" + e);
                 e.printStackTrace();
+                return weChatList2;
             }finally {
                 //释放设备
                 driverManager.releaseAppiumDriver(appiumDriverManager);
             }
         }
-
+        return weChatList2;
     }
 
     // 导入联系人

@@ -1,11 +1,12 @@
 package com.transing.mcss4dpm.biz.service.impl.api.bo;
 
 import com.transing.mcss4dpm.biz.service.impl.api.ShellProcess;
-import com.transing.mcss4dpm.util.CallRemoteServiceUtil;
 import io.appium.java_client.android.AndroidDriver;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * ${description}
@@ -34,11 +35,6 @@ public class AppiumDriverManager {
             System.out.println("执行任务定时释放任务!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! >>>>>>>>");
             long deviceId = deviceInfo.getId();
             status = "0";
-            String serverName = deviceInfo.getRegistServer();
-            String baseServer = System.getProperty("mcss_url");
-            String getApplicationInfoUrl = "/scriptRegulation/releaseDevices.json?deviceId=" + deviceId + "&serverName=" + serverName + "&datasourceTypeId=";
-            Map<String, String> inputParamMap = new HashMap<String, String>();
-            CallRemoteServiceUtil.callRemoteService(this.getClass().getName(), baseServer + getApplicationInfoUrl, "get", inputParamMap);
         }
     }
 

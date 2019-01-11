@@ -11,6 +11,28 @@
         FROM
         contacts
     </select>
+
+    <!-- 获得微信数据列表 -->
+    <select id="getWeChatData" resultType="com.transing.mcss4dpm.biz.service.impl.api.bo.WechatBO">
+        SELECT
+        `contactname`, `wechatname`, `wechatid`, `sex`, `region`,`tag`
+        FROM
+        wechat
+    </select>
+
+    <!-- 获得微信数据数据 -->
+    <select id="getWeChatDataCount" resultType="java.lang.Integer">
+        SELECT
+        count(id)
+        FROM
+        wechat
+    </select>
+
+    <!-- 添加微信数据 -->
+    <select id="insertWeChatData" parameterType="com.transing.mcss4dpm.biz.service.impl.api.bo.WechatBO">
+        insert into `wechat` (`contactname`, `wechatname`, `wechatid`, `sex`, `region`,`tag`)
+        values (#{contactName}, #{weChatName}, #{weChatId}, #{sex}, #{region}, #{tag})
+    </select>
 </mapper>
 
 

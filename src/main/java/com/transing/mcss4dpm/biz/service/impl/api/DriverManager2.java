@@ -15,7 +15,9 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
@@ -35,7 +37,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
     }
 
     private DriverManager2() {
-
+        System.out.println("初始化DriverManger2开始");
         DevicesManager devicesManager = new DevicesManager();
         // 通过adb 获得服务器的连接设备信息
         List<String> devicesInfoBoList = devicesManager.getAndroidDevices();
@@ -48,7 +50,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
             devicesInfoBo.setDevicesName(devicesInfoBoList.get(i));
             devicesInfoBo.setFuncation("taskCrawl");
             devicesInfoBo.setRegistServer("mcss_1");
-            devicesInfoBo.setId((long)i);
+            devicesInfoBo.setId((long) i);
             appiumDriverManager.setDeviceInfo(devicesInfoBo);
             appiumDriverManager.setBp(bp - i);
             appiumDriverManager.setCp(cp + i);
@@ -56,6 +58,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
             appiumDriverManager.setStatus("0");
             driverManagerList.add(appiumDriverManager);
         }
+        System.out.println("初始化DriverManger2成功");
     }
 
     @Override
@@ -68,7 +71,13 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
         List<String> nodeProcessIdAf = new ArrayList<>();
         String pid = "";
         try {
-            Process processBe = Runtime.getRuntime().exec("ps -aux");
+            // Process processBe = Runtime.getRuntime().exec("ps -aux");        // linux
+            Process processBe = Runtime.getRuntime().exec("taskList");// windows
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(processBe.getInputStream()));
+            String s;
+            while ((s = bufferedReader.readLine()) != null)
+                System.out.println(s);
+            // 这里死锁了，我们换个方式来
             processBe.waitFor();
             Scanner in = new Scanner(processBe.getInputStream());
             nodeProcessIdBe.addAll(getNodePidList(in));
@@ -78,20 +87,31 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
         if (timeout == null || timeout.equals("")) {
             timeout = "60";
         }
-        String str = "appium -p " + port + " -bp " + bp + " --chromedriver-port " + cp + " --device-name " + devicesName + " -U " + devicesName + " --command-timeout " + timeout;
-        System.out.println("启动serives    >>>>>>>>>>   " + str);
+        // linux 下面如此执行
+        // String str = "appium -p " + port + " -bp " + bp + " --chromedriver-port " + cp + " --device-name " + devicesName + " -U " + devicesName + " --command-timeout " + timeout;
+        // windows 下如此执行 ;C:\Users\Administrator\AppData\Roaming\npm\;    C:\Users\Administrator\AppData\Roaming\npm;
+        String str1 = "cmd /c C:\\Users\\Administrator\\AppData\\Roaming\\npm\\appium -p " + port + " -bp " + bp + " --chromedriver-port " + cp + " --device-name " + devicesName + " -U " + devicesName + " --command-timeout " + timeout;
+        String str2 = "cmd /c C:\\Users\\Administrator\\AppData\\Roaming\\npm\\appium -p " + port  + " --device-name " + devicesName + " -U " + devicesName + " --command-timeout " + timeout;
+        System.out.println("启动serives    >>>>>>>>>>   " + str2);
         try {
-            Runtime.getRuntime().exec(str);
+            Runtime.getRuntime().exec(str2);
             Thread.sleep(6 * 1000);
         } catch (IOException | InterruptedException ioe) {
             ioe.printStackTrace();
         }
         //遍历系统进程,获取启动的node.exe进程号
         try {
-            Process processAf = Runtime.getRuntime().exec("ps -aux");
+            // Process processAf = Runtime.getRuntime().exec("ps -aux");        // linux
+            Process processAf = Runtime.getRuntime().exec("taskList");// windows
+            //获取进程的标准输入流
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(processAf.getInputStream()));
+            String s1;
+            while ((s1 = bufferedReader.readLine()) != null)
+                System.out.println(s1);
             processAf.waitFor();
             Scanner in = new Scanner(processAf.getInputStream());
             nodeProcessIdAf.addAll(getNodePidList(in));
+
             int nodeProcessIdAfLength = nodeProcessIdAf.size();
             for (int i = nodeProcessIdAfLength - 1; i >= 0; i--) {
                 String string = nodeProcessIdAf.get(i);
@@ -129,9 +149,13 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
         out:
         while (true) {
             serviceId = pid;
-            System.out.println("删除设备nodeid    >>>>>>>>>>   " + serviceId);
-            executeShell("kill -s 9 " + serviceId, true);
-            ShellProcess shellProcess = executeShell("ps -aux", true);
+            System.out.println("删除设备nodeId    >>>>>>>>>>   " + serviceId);
+            // 下面是linux中执行的
+            // executeShell("kill -s 9 " + serviceId, true);
+            // 下面是windows中执行的
+            executeShell("taskkill /pid " + serviceId + " -t -f", true);
+            // ShellProcess shellProcess = executeShell("ps -aux", true); // linux
+            ShellProcess shellProcess = executeShell("taskList", true); // windows
             if (shellProcess.isSuccessful()) {
                 Scanner scanner = getShellResultContent(shellProcess.getProcess());
                 while (scanner.hasNext()) {
@@ -139,7 +163,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
                     if (processInf.contains("node") && processInf.contains(devicesName)) {
                         String[] strings = processInf.split("\\s+");
                         serviceId = strings[1];
-                        System.out.println("删除设备nodeid_2    >>>>>>>>>>   " + serviceId);
+                        System.out.println("删除设备nodeId_2    >>>>>>>>>>   " + serviceId);
                     } else {
                         break out;
                     }
@@ -160,7 +184,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
     @Override
     public AppiumDriverManager changeDevicesStatus(String status, String dataTypeId) {
         for (AppiumDriverManager appiumDriverManager : driverManagerList) {
-            if (appiumDriverManager.getStatus().equals(status) ) {
+            if (appiumDriverManager.getStatus().equals(status)) {
                 appiumDriverManager.setStatus("8");
                 return appiumDriverManager;
             }
@@ -171,7 +195,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
     @Override
     public AppiumDriverManager getDriverByStatus(String status) {
         for (AppiumDriverManager appiumDriverManager : driverManagerList) {
-            if (appiumDriverManager.getStatus().equals(status) ) {
+            if (appiumDriverManager.getStatus().equals(status)) {
                 appiumDriverManager.setStatus("8");
                 return appiumDriverManager;
             }
@@ -184,7 +208,7 @@ public class DriverManager2 extends DriverManagerImpl implements LinuxCommandImp
 
         List<AppiumDriverManager> list = new ArrayList<>();
         for (AppiumDriverManager appiumDriverManager : driverManagerList) {
-            if (appiumDriverManager.getStatus().equals(status) ) {
+            if (appiumDriverManager.getStatus().equals(status)) {
                 appiumDriverManager.setStatus("8");
                 list.add(appiumDriverManager);
             }

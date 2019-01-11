@@ -36,6 +36,7 @@ public abstract class DriverManagerImpl {
         String udid = appiumSettingBo.getUdid();
         String platformName = appiumSettingBo.getPlatformName();
         String automationName = appiumSettingBo.getAutomationName();
+        String platformVersion = appiumSettingBo.getPlatformVersion();
         Boolean fullReset = appiumSettingBo.getFullReset();
         Boolean noReset = appiumSettingBo.getNoReset();
         Integer bootstrapPort = appiumSettingBo.getBootstrapPort();
@@ -63,7 +64,7 @@ public abstract class DriverManagerImpl {
         }
         map.put("appPackage", appPackage);
         map.put("appActivity", appActivity);
-        map.put("devicesName", devicesName);
+        map.put("deviceName", devicesName);
         map.put("udid", udid);
         if (platformName != null) {
             map.put("platformName", platformName);
@@ -78,6 +79,7 @@ public abstract class DriverManagerImpl {
         map.put("unicodeKeyboard", unicodeKeyboard);
         map.put("resetKeyboard", resetKeyboard);
         map.put("newCommandTimeout", newCommandTimeout);
+        map.put("platformVersion",platformVersion);
         for (String key : map.keySet()) {
             if (map.get(key) != null) {
                 capability.setCapability(key, map.get(key));
@@ -118,6 +120,7 @@ public abstract class DriverManagerImpl {
                     capability);
             driver.manage().timeouts().implicitlyWait(waitTime, TimeUnit.SECONDS);
             appiumDriverManager.timeInit();
+            System.out.println("启动成功");
             return driver;
         } catch (MalformedURLException e) {
             e.printStackTrace();

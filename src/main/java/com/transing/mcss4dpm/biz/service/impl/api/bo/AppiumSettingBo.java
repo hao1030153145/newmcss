@@ -26,6 +26,7 @@ public class AppiumSettingBo {
     private Integer newCommandTimeout;  //设置命令超时时间，单位：秒.达到超时时间仍未接收到新的命令时 Appium 会假设客户端退出然后自动结束会话。
     private KeystoreOption keystoreOption; //签名相关设置
     private ChromeOption chromeOption; //chrome相关设置
+    private String platformVersion; // 平台版本
 
     public int getId() {
         return id;
@@ -177,5 +178,13 @@ public class AppiumSettingBo {
 
     public void setChromeOption(ChromeOption chromeOption) {
         this.chromeOption = chromeOption;
+    }
+
+    public String getPlatformVersion() {
+        return platformVersion;
+    }
+
+    public void setPlatformVersion(String platformVersion) {
+        this.platformVersion = platformVersion;
     }
 }

@@ -36,6 +36,8 @@
 
     <!-- 全局异常定义 -->
     <bean id="mySystemCode" class="com.transing.mcss4dpm.web.exception.MySystemCode"/>
+    <!-- 普通类调用service的bean注入 -->
+    <bean id="ApplicationContextHelper" class="com.transing.mcss4dpm.util.ApplicationContextHelper"/>
     <bean class="com.jeeframework.webframework.exception.GlobalHandlerExceptionResolver">
         <property name="systemCode" ref="mySystemCode"></property>
     </bean>
